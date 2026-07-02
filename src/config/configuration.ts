@@ -1,8 +1,13 @@
 export default () => ({
   port: parseInt(process.env.PORT || "3001", 10),
   appUrl: process.env.APP_URL || "http://localhost:3001",
-  frontendUrl: process.env.FRONTEND_URL || "http://localhost:8081",
   databaseUrl: process.env.DATABASE_URL || "",
+  r2: {
+    accountId: process.env.R2_ACCOUNT_ID || "",
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
+    bucketName: process.env.R2_BUCKET_NAME || "",
+  },
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET || "",
     refreshSecret: process.env.JWT_REFRESH_SECRET || "",
