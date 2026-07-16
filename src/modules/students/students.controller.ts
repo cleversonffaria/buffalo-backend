@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, Req } from "@nestjs/common";
+import { Request } from "express";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { UserRole } from "src/common/enums/user-role.enum";
 import { CreateStudentDto } from "src/modules/students/dto/create-student.dto";
@@ -10,21 +11,22 @@ export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
   @Post()
-  createStudent(@Body() dto: CreateStudentDto) {
-    return this.studentsService.createStudent(dto);
+  createStudent(@Body() dto: CreateStudentDto, @Req() request: Request) {
+    return this.studentsService.createStudent(dto, request);
   }
 
   @Get()
-  getStudents(@Query("includeDeleted") includeDeleted?: string) {
-    return this.studentsService.getStudents(includeDeleted === "true");
+  getStudents(@Query("includeDeleted") includeDeleted: string | undefined, @Req() request: Request) {
+    return this.studentsService.getStudents(includeDeleted === "true", request);
   }
 
   @Get(":id")
   getStudentById(
     @Param("id") id: string,
-    @Query("includeDeleted") includeDeleted?: string
+    @Query("includeDeleted") includeDeleted: string | undefined,
+    @Req() request: Request
   ) {
-    return this.studentsService.getStudentById(id, includeDeleted === "true");
+    return this.studentsService.getStudentById(id, includeDeleted === "true", request);
   }
 
   @Patch(":id/delete")

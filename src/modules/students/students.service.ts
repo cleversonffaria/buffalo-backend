@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Request } from "express";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CodePurpose } from "src/common/enums/code-purpose.enum";
@@ -8,6 +9,7 @@ import { StudentTrainingEntity } from "src/database/entities/student-training.en
 import { UserEntity } from "src/database/entities/user.entity";
 import { MailService } from "src/modules/mail/mail.service";
 import { CreateStudentDto } from "src/modules/students/dto/create-student.dto";
+import { getRequestBaseUrl, resolvePublicFileUrl } from "src/modules/storage/storage.utils";
 
 @Injectable()
 export class StudentsService {
@@ -21,7 +23,9 @@ export class StudentsService {
     private readonly mailService: MailService
   ) {}
 
-  async createStudent(dto: CreateStudentDto) {
+  async createStudent(dto: CreateStudentDto, request: Request) {
+    const baseUrl = getRequestBaseUrl(request);
+
     const existingUser = await this.usersRepository.findOne({
       where: { email: dto.email.toLowerCase() },
     });
@@ -73,12 +77,13 @@ export class StudentsService {
 
     return {
       success: true,
-      student: this.serializeStudent(savedStudent),
+      student: this.serializeStudent(savedStudent, baseUrl),
       activationCode: activationCode.code,
     };
   }
 
-  async getStudents(includeDeleted = false) {
+  async getStudents(includeDeleted = false, request: Request) {
+    const baseUrl = getRequestBaseUrl(request);
     const students = await this.usersRepository.find({
       where: {
         role: UserRole.STUDENT,
@@ -90,11 +95,12 @@ export class StudentsService {
       success: true,
       students: students
         .filter((student) => includeDeleted || !student.deletedAt)
-        .map((student) => this.serializeStudent(student)),
+        .map((student) => this.serializeStudent(student, baseUrl)),
     };
   }
 
-  async getStudentById(id: string, includeDeleted = false) {
+  async getStudentById(id: string, includeDeleted = false, request: Request) {
+    const baseUrl = getRequestBaseUrl(request);
     const student = await this.usersRepository.findOne({
       where: { id, role: UserRole.STUDENT },
     });
@@ -105,7 +111,7 @@ export class StudentsService {
 
     return {
       success: true,
-      student: this.serializeStudent(student),
+      student: this.serializeStudent(student, baseUrl),
     };
   }
 
@@ -147,7 +153,7 @@ export class StudentsService {
     return { success: true };
   }
 
-  private serializeStudent(student: UserEntity) {
+  private serializeStudent(student: UserEntity, baseUrl: string) {
     return {
       id: student.id,
       email: student.email,
@@ -155,7 +161,7 @@ export class StudentsService {
       phone: student.phone,
       age: student.age,
       gender: student.gender,
-      avatar_url: student.avatarUrl,
+      avatar_url: resolvePublicFileUrl(student.avatarUrl, baseUrl),
       role: student.role,
       goal: student.goal,
       start_date: student.startDate,

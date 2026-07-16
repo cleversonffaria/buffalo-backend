@@ -12,6 +12,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Request, Response } from "express";
+import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { UserRole } from "src/common/enums/user-role.enum";
 import { StorageService } from "src/modules/storage/storage.service";
@@ -21,25 +22,35 @@ import { createMulterStorage } from "src/modules/storage/storage.utils";
 export class StorageController {
   constructor(private readonly storageService: StorageService) {}
 
+  private getObjectKeyFromRequest(request: Request) {
+    const wildcardParam =
+      request.params?.[0] ||
+      request.params?.["0"] ||
+      request.path.split("/storage/files/")[1] ||
+      request.originalUrl.split("/api/storage/files/")[1];
+
+    return decodeURIComponent((wildcardParam || "").replace(/^\/+/, ""));
+  }
+
   @Post("images")
   @Roles(UserRole.TEACHER)
   @UseInterceptors(FileInterceptor("file", { storage: createMulterStorage() }))
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
-    return this.storageService.uploadFile("image", file);
+  uploadImage(@Req() request: Request, @UploadedFile() file: Express.Multer.File) {
+    return this.storageService.uploadFile("image", request, file);
   }
 
   @Post("videos")
   @Roles(UserRole.TEACHER)
   @UseInterceptors(FileInterceptor("file", { storage: createMulterStorage() }))
-  uploadVideo(@UploadedFile() file: Express.Multer.File) {
-    return this.storageService.uploadFile("video", file);
+  uploadVideo(@Req() request: Request, @UploadedFile() file: Express.Multer.File) {
+    return this.storageService.uploadFile("video", request, file);
   }
 
   @Post("avatars")
   @Roles(UserRole.TEACHER)
   @UseInterceptors(FileInterceptor("file", { storage: createMulterStorage() }))
-  uploadAvatar(@UploadedFile() file: Express.Multer.File) {
-    return this.storageService.uploadFile("avatar", file);
+  uploadAvatar(@Req() request: Request, @UploadedFile() file: Express.Multer.File) {
+    return this.storageService.uploadFile("avatar", request, file);
   }
 
   @Delete()
@@ -48,12 +59,17 @@ export class StorageController {
     return this.storageService.deleteByUrl(url);
   }
 
+  @Public()
   @Get("files/*")
   getFile(
     @Req() request: Request,
     @Res() response: Response,
     @Headers("range") range?: string
   ) {
-    return this.storageService.streamFile(request.params[0], response, range);
+    return this.storageService.streamFile(
+      this.getObjectKeyFromRequest(request),
+      response,
+      range
+    );
   }
 }

@@ -5,6 +5,7 @@ import configuration from "src/config/configuration";
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private readonly config = configuration();
+  private readonly isProduction = this.config.nodeEnv === "production";
 
   async sendActivationCode(
     email: string,
@@ -23,7 +24,13 @@ export class MailService {
       </div>
     `;
 
-    await this.sendEmail(email, studentName, "Código de Ativação - Exito", htmlContent);
+    await this.sendEmail(
+      email,
+      studentName,
+      "Código de Ativação - Exito",
+      htmlContent,
+      code
+    );
   }
 
   async sendPasswordResetCode(
@@ -43,14 +50,21 @@ export class MailService {
       </div>
     `;
 
-    await this.sendEmail(email, userName, "Redefinição de Senha - Exito", htmlContent);
+    await this.sendEmail(
+      email,
+      userName,
+      "Redefinição de Senha - Exito",
+      htmlContent,
+      code
+    );
   }
 
   private async sendEmail(
     email: string,
     recipientName: string,
     subject: string,
-    htmlContent: string
+    htmlContent: string,
+    code: string
   ) {
     const apiKey = this.config.mail.brevoApiKey;
 
@@ -75,20 +89,34 @@ export class MailService {
       textContent: htmlContent.replace(/<[^>]+>/g, " "),
     };
 
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "api-key": apiKey,
-      },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "api-key": apiKey,
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      this.logger.error(`Falha ao enviar email: ${errorBody}`);
-      throw new Error("Falha ao enviar email");
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(errorBody || "Falha ao enviar email");
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Falha ao enviar email";
+
+      if (this.isProduction) {
+        this.logger.error(`Falha ao enviar email para ${email}: ${errorMessage}`);
+        throw new Error("Falha ao enviar email");
+      }
+
+      this.logger.warn(
+        `Falha ao enviar email em ${this.config.nodeEnv} para ${email}: ${errorMessage}`
+      );
+      this.logger.warn(`Código gerado para ${email}: ${code}`);
     }
   }
 }

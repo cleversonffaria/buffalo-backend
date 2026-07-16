@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { CurrentUser } from "src/common/decorators/current-user.decorator";
 import { Public } from "src/common/decorators/public.decorator";
+import { Roles } from "src/common/decorators/roles.decorator";
+import { UserRole } from "src/common/enums/user-role.enum";
 import { JwtUser } from "src/common/interfaces/jwt-user.interface";
 import { ActivateAccountDto } from "src/modules/auth/dto/activate-account.dto";
 import { LoginDto } from "src/modules/auth/dto/login.dto";
@@ -15,7 +17,7 @@ import { AuthService } from "src/modules/auth/auth.service";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Public()
+  @Roles(UserRole.TEACHER)
   @Post("register")
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);

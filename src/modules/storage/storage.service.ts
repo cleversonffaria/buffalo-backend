@@ -13,7 +13,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { existsSync, unlinkSync } from "fs";
 import { join } from "path";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { Readable } from "stream";
 import configuration from "src/config/configuration";
 import { StorageFolderType } from "src/modules/storage/storage.constants";
@@ -22,13 +22,18 @@ import {
   buildStorageObjectKey,
   createStorageFileName,
   getRelativeStoragePathFromUrl,
+  getRequestBaseUrl,
 } from "src/modules/storage/storage.utils";
 
 @Injectable()
 export class StorageService {
   private readonly config = configuration();
 
-  async uploadFile(folderType: StorageFolderType, file?: Express.Multer.File) {
+  async uploadFile(
+    folderType: StorageFolderType,
+    request: Request,
+    file?: Express.Multer.File
+  ) {
     if (!file) {
       throw new BadRequestException("Arquivo não enviado");
     }
@@ -46,9 +51,11 @@ export class StorageService {
       })
     );
 
+    const fileUrl = buildStorageFileUrl(objectKey, getRequestBaseUrl(request));
+
     return {
       success: true,
-      url: buildStorageFileUrl(objectKey),
+      url: fileUrl,
     };
   }
 
@@ -168,6 +175,17 @@ export class StorageService {
   }
 
   private async pipeBodyToResponse(body: unknown, response: Response) {
+    if (
+      body &&
+      typeof body === "object" &&
+      "transformToByteArray" in body &&
+      typeof body.transformToByteArray === "function"
+    ) {
+      const buffer = Buffer.from(await body.transformToByteArray());
+      response.end(buffer);
+      return;
+    }
+
     if (body instanceof Readable) {
       await new Promise<void>((resolve, reject) => {
         body.on("error", reject);
@@ -193,17 +211,6 @@ export class StorageService {
         response.on("close", resolve);
         readable.pipe(response);
       });
-      return;
-    }
-
-    if (
-      body &&
-      typeof body === "object" &&
-      "transformToByteArray" in body &&
-      typeof body.transformToByteArray === "function"
-    ) {
-      const buffer = Buffer.from(await body.transformToByteArray());
-      response.end(buffer);
       return;
     }
 

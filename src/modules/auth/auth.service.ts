@@ -58,7 +58,11 @@ export class AuthService {
     });
 
     const savedUser = await this.usersRepository.save(user);
-    return this.buildAuthResponse(savedUser);
+
+    return {
+      success: true,
+      user: this.serializeUser(savedUser),
+    };
   }
 
   async login(dto: LoginDto) {
