@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString } from "class-validator";
+import { IsInt, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateTrainingLogDto {
   @IsString()
@@ -39,8 +39,12 @@ export class LogCompletedSetDto {
   @IsInt()
   repsCompleted: number;
 
+  @IsOptional()
+  @IsNumber()
   weightUsed?: number;
 
+  @IsOptional()
+  @IsInt()
   duration?: number;
 
   @IsOptional()
