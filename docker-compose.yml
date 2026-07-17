@@ -31,10 +31,10 @@ services:
       - .env
     environment:
       NODE_ENV: production
-      PORT: ${PORT:-3001}
+      PORT: ${PORT:-3010}
       DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-gym}
     ports:
-      - "${PORT:-3001}:3001"
+      - "${PORT:-3010}:3010"
     volumes:
       - uploads_data:/app/uploads
 

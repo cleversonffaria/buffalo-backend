@@ -30,6 +30,6 @@ COPY --from=build /app/dist ./dist
 
 RUN mkdir -p uploads
 
-EXPOSE 3001
+EXPOSE 3010
 
 CMD ["node", "dist/main"]
