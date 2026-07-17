@@ -16,9 +16,9 @@ export default () => ({
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "30d",
   },
   mail: {
-    brevoApiKey: process.env.BREVO_API_KEY || "",
-    senderEmail: process.env.BREVO_SENDER_EMAIL || "no-reply@exito.app",
-    senderName: process.env.BREVO_SENDER_NAME || "Exito",
+    resendApiKey: process.env.RESEND_API_KEY || "",
+    senderEmail: process.env.RESEND_SENDER_EMAIL || "no-reply@exito.app",
+    senderName: process.env.RESEND_SENDER_NAME || "Exito",
   },
   uploadsDir: process.env.UPLOADS_DIR || "uploads",
   enableTypeormSync: process.env.ENABLE_TYPEORM_SYNC === "true",

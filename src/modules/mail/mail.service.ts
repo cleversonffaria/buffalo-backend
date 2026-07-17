@@ -66,36 +66,35 @@ export class MailService {
     htmlContent: string,
     code: string
   ) {
-    const apiKey = this.config.mail.brevoApiKey;
+    const apiKey = this.config.mail.resendApiKey;
 
     if (!apiKey) {
-      this.logger.warn(`BREVO_API_KEY ausente. Código para ${email}: ${subject}`);
+      this.logger.warn(`RESEND_API_KEY ausente. Código para ${email}: ${subject}`);
       return;
     }
 
     const payload = {
-      sender: {
-        email: this.config.mail.senderEmail,
-        name: this.config.mail.senderName,
-      },
-      to: [
+      from: `${this.config.mail.senderName} <${this.config.mail.senderEmail}>`,
+      to: [email],
+      subject,
+      html: htmlContent,
+      text: htmlContent.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+      tags: [
         {
-          email,
-          name: recipientName,
+          name: "flow",
+          value: subject.includes("Ativação") ? "activation" : "password-reset",
         },
       ],
-      subject,
-      htmlContent,
-      textContent: htmlContent.replace(/<[^>]+>/g, " "),
     };
 
     try {
-      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          "api-key": apiKey,
+          Authorization: `Bearer ${apiKey}`,
+          "User-Agent": "exito-backend/1.0",
         },
         body: JSON.stringify(payload),
       });
