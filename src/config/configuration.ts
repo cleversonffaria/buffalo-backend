@@ -18,7 +18,7 @@ export default () => ({
   mail: {
     resendApiKey: process.env.RESEND_API_KEY || "",
     senderEmail: process.env.RESEND_SENDER_EMAIL || "no-reply@exito.app",
-    senderName: process.env.RESEND_SENDER_NAME || "Exito",
+    senderName: process.env.RESEND_SENDER_NAME || "Buffalo",
   },
   uploadsDir: process.env.UPLOADS_DIR || "uploads",
   enableTypeormSync: process.env.ENABLE_TYPEORM_SYNC === "true",

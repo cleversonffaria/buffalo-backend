@@ -14,10 +14,10 @@ export class MailService {
   ): Promise<void> {
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #22c55e;">Exito</h1>
+        <h1 style="color: #dc2626;">Buffalo</h1>
         <h2>Bem-vindo, ${studentName}!</h2>
         <p>Use o código abaixo para ativar sua conta:</p>
-        <div style="padding: 24px; background: #22c55e; color: white; border-radius: 8px; text-align: center; font-size: 40px; letter-spacing: 8px;">
+        <div style="padding: 24px; background: #dc2626; color: white; border-radius: 8px; text-align: center; font-size: 40px; letter-spacing: 8px;">
           ${code}
         </div>
         <p>Esse código expira em 24 horas.</p>
@@ -27,7 +27,7 @@ export class MailService {
     await this.sendEmail(
       email,
       studentName,
-      "Código de Ativação - Exito",
+      "Código de Ativação - Buffalo",
       htmlContent,
       code
     );
@@ -40,10 +40,10 @@ export class MailService {
   ): Promise<void> {
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #22c55e;">Exito</h1>
+        <h1 style="color: #dc2626;">Buffalo</h1>
         <h2>Olá, ${userName}!</h2>
         <p>Use o código abaixo para redefinir sua senha:</p>
-        <div style="padding: 24px; background: #0f172a; color: white; border-radius: 8px; text-align: center; font-size: 40px; letter-spacing: 8px;">
+        <div style="padding: 24px; background: #dc2626; color: white; border-radius: 8px; text-align: center; font-size: 40px; letter-spacing: 8px;">
           ${code}
         </div>
         <p>Esse código expira em 1 hora.</p>
@@ -53,7 +53,7 @@ export class MailService {
     await this.sendEmail(
       email,
       userName,
-      "Redefinição de Senha - Exito",
+      "Redefinição de Senha - Buffalo",
       htmlContent,
       code
     );
@@ -94,7 +94,7 @@ export class MailService {
           Accept: "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
-          "User-Agent": "exito-backend/1.0",
+          "User-Agent": "buffalo-backend/1.0",
         },
         body: JSON.stringify(payload),
       });
