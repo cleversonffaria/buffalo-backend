@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { StudentTrainingEntity } from "src/database/entities/student-training.entity";
@@ -11,6 +11,8 @@ import {
 
 @Injectable()
 export class TrainingLogsService {
+  private readonly logger = new Logger(TrainingLogsService.name);
+
   constructor(
     @InjectRepository(TrainingLogEntity)
     private readonly trainingLogsRepository: Repository<TrainingLogEntity>,
@@ -65,6 +67,10 @@ export class TrainingLogsService {
       ? new Date(`${dto.customDate}T12:00:00.000Z`)
       : new Date();
 
+    this.logger.log(
+      `Saving completed set studentTrainingId=${dto.studentTrainingId} exerciseId=${dto.exerciseId} setNumber=${dto.setNumber} completedAt=${completedAt.toISOString()}`
+    );
+
     const trainingLog = await this.trainingLogsRepository.save(
       this.trainingLogsRepository.create({
         studentTrainingId: dto.studentTrainingId,
@@ -75,6 +81,10 @@ export class TrainingLogsService {
         durationSeconds: dto.duration ?? null,
         completedAt,
       })
+    );
+
+    this.logger.log(
+      `Completed set saved trainingLogId=${trainingLog.id} studentTrainingId=${trainingLog.studentTrainingId} trainingExerciseId=${trainingLog.trainingExerciseId}`
     );
 
     return { success: true, trainingLog: this.serializeTrainingLog(trainingLog) };

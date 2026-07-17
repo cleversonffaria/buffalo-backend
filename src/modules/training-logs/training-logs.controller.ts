@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Logger, Param, Post, Query } from "@nestjs/common";
 import {
   CreateTrainingLogDto,
   LogCompletedSetDto,
@@ -7,6 +7,8 @@ import { TrainingLogsService } from "src/modules/training-logs/training-logs.ser
 
 @Controller("training-logs")
 export class TrainingLogsController {
+  private readonly logger = new Logger(TrainingLogsController.name);
+
   constructor(private readonly trainingLogsService: TrainingLogsService) {}
 
   @Post()
@@ -24,6 +26,10 @@ export class TrainingLogsController {
 
   @Post("completed-set")
   logCompletedSet(@Body() dto: LogCompletedSetDto) {
+    this.logger.log(
+      `POST /training-logs/completed-set studentTrainingId=${dto.studentTrainingId} exerciseId=${dto.exerciseId} setNumber=${dto.setNumber} repsCompleted=${dto.repsCompleted ?? "null"} weightUsed=${dto.weightUsed ?? "null"} duration=${dto.duration ?? "null"} customDate=${dto.customDate ?? "null"}`
+    );
+
     return this.trainingLogsService.logCompletedSet(dto);
   }
 
